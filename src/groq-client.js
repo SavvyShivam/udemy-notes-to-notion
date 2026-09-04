@@ -53,6 +53,9 @@ export async function summarizeTranscript(transcriptText, apiKey, fetchImpl = fe
   }
 
   const data = await response.json();
-  const rawText = data.choices[0].message.content;
+  const rawText = data.choices?.[0]?.message?.content;
+  if (!rawText) {
+    throw new Error('Groq API returned an unexpected response shape');
+  }
   return parseGroqResponse(rawText);
 }

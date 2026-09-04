@@ -56,3 +56,19 @@ test('summarizeTranscript throws with status and body on non-ok response', async
     /Groq API error 401: bad key/
   );
 });
+
+test('summarizeTranscript throws with clear error on malformed response (empty choices)', async () => {
+  const fakeFetch = async () => ({ ok: true, json: async () => ({ choices: [] }) });
+  await assert.rejects(
+    () => summarizeTranscript('t', 'test-key', fakeFetch),
+    /Groq API returned an unexpected response shape/
+  );
+});
+
+test('summarizeTranscript throws with clear error on malformed response (missing message)', async () => {
+  const fakeFetch = async () => ({ ok: true, json: async () => ({ choices: [{}] }) });
+  await assert.rejects(
+    () => summarizeTranscript('t', 'test-key', fakeFetch),
+    /Groq API returned an unexpected response shape/
+  );
+});
