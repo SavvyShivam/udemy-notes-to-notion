@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Udemy Notes to Notion — Settings</title>
+  <style>
+    body { font-family: sans-serif; max-width: 480px; margin: 24px auto; }
+    label { display: block; margin-top: 12px; font-weight: bold; }
+    input { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
+    button { margin-top: 16px; padding: 8px 16px; }
+    #status { margin-top: 12px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Settings</h1>
+  <label for="groqApiKey">Groq API key</label>
+  <input id="groqApiKey" type="password" />
+
+  <label for="notionToken">Notion integration token</label>
+  <input id="notionToken" type="password" />
+
+  <label for="notionParentPageId">Notion parent page ID</label>
+  <input id="notionParentPageId" type="text" placeholder="paste the page ID or URL you shared with your integration" />
+
+  <button id="saveButton">Save</button>
+  <div id="status"></div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>
