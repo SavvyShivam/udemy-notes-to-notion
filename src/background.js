@@ -50,4 +50,10 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
 
     return true;
   });
+
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'OPEN_OPTIONS') {
+      chrome.runtime.openOptionsPage();
+    }
+  });
 }
