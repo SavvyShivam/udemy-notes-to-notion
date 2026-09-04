@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Udemy Notes to Notion",
+  "version": "0.1.0",
+  "description": "Summarize Udemy lecture transcripts and save them to Notion.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://*.udemy.com/*",
+    "https://api.groq.com/*",
+    "https://api.notion.com/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.udemy.com/course/*/learn/*"],
+      "js": ["src/content-script.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "src/options.html"
+}
