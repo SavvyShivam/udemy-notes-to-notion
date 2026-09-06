@@ -29,6 +29,25 @@ course → section → lecture.
 4. Re-clicking "Save Notes" on the same lecture updates its existing toggle
    instead of creating a duplicate.
 
+### How notes are organized in Notion
+
+Point the extension at one parent page you'll reuse forever (e.g. "Udemy
+Learning"). Every course you save notes from gets its own page underneath
+it, created automatically the first time you use the button on that course —
+you never have to touch settings again. Sections and lectures then just
+accumulate inside that course's page as you work through it:
+
+```
+Udemy Learning (your parent page)
+ ├─ Complete Generative AI Course: RAG, AI Agents & Deployment
+ │   ├─ Section: Accessing LLMs in Python
+ │   │   └─ ▸ Ollama (Open-Source & Local)
+ │   └─ Section: ...
+ ├─ Some Other Course You Take Later
+ │   └─ Section: ...
+ └─ ...
+```
+
 ## Development
 
 Run unit tests: `npm test`
