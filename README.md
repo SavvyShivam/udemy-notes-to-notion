@@ -4,6 +4,12 @@ Chrome extension that summarizes a Udemy lecture's transcript (via Groq) and
 saves a brief + bullet notes into a structured Notion page, organized by
 course → section → lecture.
 
+## Screenshots
+
+| Save Notes on a lecture | Notes saved in Notion | Settings page |
+|---|---|---|
+| ![Save Notes button on a Udemy lecture](screenshots/udemy-lecture-transcript.png) | ![Saved notes as a toggle block in Notion](screenshots/notion-saved-notes.png) | ![Extension settings page](screenshots/options-page.png) |
+
 ## Setup
 
 1. **Groq API key** — sign up at https://console.groq.com and create an API key.
