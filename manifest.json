@@ -1,8 +1,22 @@
 {
   "manifest_version": 3,
   "name": "Udemy Notes to Notion",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Summarize Udemy lecture transcripts and save them to Notion.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Udemy Notes to Notion — open settings",
+    "default_popup": ""
+  },
   "permissions": ["storage"],
   "host_permissions": [
     "https://*.udemy.com/*",

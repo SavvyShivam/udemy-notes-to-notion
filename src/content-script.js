@@ -1,5 +1,7 @@
+const TRANSCRIPT_CUE_SELECTOR = '[data-purpose="transcript-cue"], [data-purpose="transcript-cue-active"]';
+
 function getTranscriptText() {
-  const cueNodes = document.querySelectorAll('[data-purpose="transcript-cue"]');
+  const cueNodes = document.querySelectorAll(TRANSCRIPT_CUE_SELECTOR);
   if (cueNodes.length === 0) return null;
   return Array.from(cueNodes)
     .map((node) => node.textContent.trim())
@@ -8,28 +10,48 @@ function getTranscriptText() {
 }
 
 async function ensureTranscriptPanelOpen() {
-  if (document.querySelector('[data-purpose="transcript-cue"]')) return true;
+  if (document.querySelector(TRANSCRIPT_CUE_SELECTOR)) return true;
 
   const toggleButton = document.querySelector('[data-purpose="transcript-toggle"]');
   if (!toggleButton) return false;
 
   toggleButton.click();
   await new Promise((resolve) => setTimeout(resolve, 500));
-  return Boolean(document.querySelector('[data-purpose="transcript-cue"]'));
+  return Boolean(document.querySelector(TRANSCRIPT_CUE_SELECTOR));
+}
+
+// The player labels the active lecture's section with an aria-label like
+// "Section 3: Accessing LLMs in Python, Lecture 10: Ollama (Open-Source & Local)".
+// That's a more reliable source than the curriculum sidebar, whose data-purpose
+// attributes Udemy has changed repeatedly (and which requires the sidebar open).
+function getCurriculumLabelParts() {
+  const el = document.querySelector('[data-purpose="curriculum-item-viewer-content"] [aria-label]');
+  const label = el ? el.getAttribute('aria-label') : null;
+  if (!label) return null;
+  const match = label.match(/^Section\s+\d+:\s*(.+?),\s*Lecture\s+\d+:\s*(.+)$/i);
+  return match ? { sectionTitle: match[1].trim(), lectureTitle: match[2].trim() } : null;
 }
 
 function getCourseTitle() {
-  const el = document.querySelector('[data-purpose="course-header-title"]') || document.querySelector('h1');
+  const el = document.querySelector('[data-purpose="course-header-title"] a') ||
+    document.querySelector('[data-purpose="course-header-title"]') ||
+    document.querySelector('h1');
   return el ? el.textContent.trim() : 'Untitled Course';
 }
 
 function getLectureTitle() {
+  const fromLabel = getCurriculumLabelParts();
+  if (fromLabel) return fromLabel.lectureTitle;
+
   const el = document.querySelector('[data-purpose="curriculum-item-title"][aria-current="true"]') ||
     document.querySelector('[data-purpose="course-lecture-title"]');
   return el ? el.textContent.trim() : document.title;
 }
 
 function getSectionTitle() {
+  const fromLabel = getCurriculumLabelParts();
+  if (fromLabel) return fromLabel.sectionTitle;
+
   const activeItem = document.querySelector('[data-purpose="curriculum-item-title"][aria-current="true"]');
   if (!activeItem) return 'Section';
   const sectionContainer = activeItem.closest('[data-purpose^="section-panel"]');

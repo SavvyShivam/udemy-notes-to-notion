@@ -7,6 +7,16 @@ import {
   replaceToggleChildren
 } from './notion-client.js';
 
+// A cached page/block id can go stale if the user deletes or trashes it in Notion
+// after we cached it. Notion reports that as a 404 (permanently deleted) or a 400
+// "archived ancestor" validation error. Recognize those so we can rebuild instead
+// of surfacing a raw API error.
+export function isStaleNotionError(error) {
+  const message = error.message || '';
+  const status = message.match(/error (\d{3}):/)?.[1];
+  return status === '404' || (status === '400' && /archived/i.test(message));
+}
+
 export async function saveNotes({ courseTitle, sectionTitle, lectureTitle, transcriptText }, deps = {}) {
   const doGetConfig = deps.getConfig || getConfig;
   const doSummarize = deps.summarizeTranscript || summarizeTranscript;
@@ -24,18 +34,32 @@ export async function saveNotes({ courseTitle, sectionTitle, lectureTitle, trans
 
   const { brief, bullets } = await doSummarize(transcriptText, config.groqApiKey);
 
-  const cache = await doGetCache(courseTitle);
+  let cache = await doGetCache(courseTitle);
 
-  const coursePageId = await doFindCoursePage(courseTitle, cache, config.notionToken, config.notionParentPageId);
-  await doSetCache(courseTitle, cache);
+  const runNotionSteps = async () => {
+    const coursePageId = await doFindCoursePage(courseTitle, cache, config.notionToken, config.notionParentPageId);
+    await doSetCache(courseTitle, cache);
 
-  await doFindSectionHeading(sectionTitle, coursePageId, cache, config.notionToken);
-  await doSetCache(courseTitle, cache);
+    await doFindSectionHeading(sectionTitle, coursePageId, cache, config.notionToken);
+    await doSetCache(courseTitle, cache);
 
-  const toggleBlockId = await doFindLectureToggle(lectureTitle, coursePageId, cache, config.notionToken);
-  await doSetCache(courseTitle, cache);
+    const toggleBlockId = await doFindLectureToggle(lectureTitle, sectionTitle, coursePageId, cache, config.notionToken);
+    await doSetCache(courseTitle, cache);
 
-  await doReplaceChildren(toggleBlockId, brief, bullets, config.notionToken);
+    await doReplaceChildren(toggleBlockId, brief, bullets, config.notionToken);
+  };
+
+  try {
+    await runNotionSteps();
+  } catch (error) {
+    if (!isStaleNotionError(error)) throw error;
+    // ponytail: reset the whole course's cache and rebuild once rather than tracking
+    // exactly which node went stale. Upgrade path: reset only the failing subtree
+    // (course/section/lecture) if recreating the full course page becomes a real cost.
+    cache = { pageId: null, sections: {}, lectures: {} };
+    await doSetCache(courseTitle, cache);
+    await runNotionSteps();
+  }
 
   return { brief, bullets };
 }
@@ -56,4 +80,8 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
       chrome.runtime.openOptionsPage();
     }
   });
+}
+
+if (typeof chrome !== 'undefined' && chrome.action && chrome.action.onClicked) {
+  chrome.action.onClicked.addListener(() => chrome.runtime.openOptionsPage());
 }

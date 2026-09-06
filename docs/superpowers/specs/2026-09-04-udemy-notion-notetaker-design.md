@@ -96,8 +96,9 @@ never talks to Groq or Notion directly.
 
 Three fields: Groq API key, Notion integration token, Notion parent page
 (paste a page ID or URL — the page the user has already shared with their
-integration). Stored in `chrome.storage.local`. A "Test connection" action
-validates both keys with a lightweight API call before saving.
+integration). Stored in `chrome.storage.local`. Keys are not validated at
+entry; an invalid key surfaces as a clear error toast the first time
+"Save Notes" is used.
 
 ## Notion page structure
 

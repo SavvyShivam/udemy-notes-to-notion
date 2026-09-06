@@ -17,6 +17,9 @@ course → section → lecture.
    Options), paste in your Groq key, Notion token, and Notion parent page,
    and click Save.
 
+   Note: API keys are not validated when saved — the first sign of a bad
+   key is an error toast when clicking "Save Notes" on a lecture.
+
 ## Usage
 
 1. Open any Udemy lecture, open its transcript panel.
@@ -29,3 +32,17 @@ course → section → lecture.
 ## Development
 
 Run unit tests: `npm test`
+
+Regenerate the toolbar/store icons (`icons/icon{16,48,128}.png`):
+`node scripts/generate-icons.js` (placeholder branding — swap in real artwork
+by replacing those PNGs directly whenever you have a logo).
+
+## Privacy
+
+No data is collected by the developer. Your API keys stay in your browser's
+local storage and are used only to talk directly to Groq/Notion on your
+behalf. See [PRIVACY.md](PRIVACY.md).
+
+## License
+
+MIT — see [LICENSE](LICENSE).

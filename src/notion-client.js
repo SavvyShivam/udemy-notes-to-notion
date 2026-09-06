@@ -9,19 +9,23 @@ function headers(token) {
   };
 }
 
+function truncate(text) {
+  return text.length > 2000 ? text.slice(0, 1997) + '...' : text;
+}
+
 export function buildLectureChildren(brief, bullets) {
   const children = [
     {
       object: 'block',
       type: 'paragraph',
-      paragraph: { rich_text: [{ type: 'text', text: { content: brief } }] }
+      paragraph: { rich_text: [{ type: 'text', text: { content: truncate(brief) } }] }
     }
   ];
   for (const bullet of bullets) {
     children.push({
       object: 'block',
       type: 'bulleted_list_item',
-      bulleted_list_item: { rich_text: [{ type: 'text', text: { content: bullet } }] }
+      bulleted_list_item: { rich_text: [{ type: 'text', text: { content: truncate(bullet) } }] }
     });
   }
   return children;
@@ -74,17 +78,20 @@ export async function findOrCreateSectionHeading(sectionTitle, coursePageId, cac
 
   const data = await response.json();
   const headingBlockId = data.results[0].id;
-  cache.sections[sectionTitle] = { headingBlockId };
+  const dividerBlockId = data.results[1].id;
+  cache.sections[sectionTitle] = { headingBlockId, lastBlockId: dividerBlockId, lectures: {} };
   return headingBlockId;
 }
 
-export async function findOrCreateLectureToggle(lectureTitle, coursePageId, cache, token, fetchImpl = fetch) {
-  if (cache.lectures[lectureTitle]) return cache.lectures[lectureTitle].toggleBlockId;
+export async function findOrCreateLectureToggle(lectureTitle, sectionTitle, coursePageId, cache, token, fetchImpl = fetch) {
+  const section = cache.sections[sectionTitle];
+  if (section.lectures[lectureTitle]) return section.lectures[lectureTitle].toggleBlockId;
 
   const response = await fetchImpl(`${NOTION_API_URL}/blocks/${coursePageId}/children`, {
     method: 'PATCH',
     headers: headers(token),
     body: JSON.stringify({
+      after: section.lastBlockId,
       children: [
         {
           object: 'block',
@@ -101,7 +108,8 @@ export async function findOrCreateLectureToggle(lectureTitle, coursePageId, cach
 
   const data = await response.json();
   const toggleBlockId = data.results[0].id;
-  cache.lectures[lectureTitle] = { toggleBlockId };
+  section.lectures[lectureTitle] = { toggleBlockId };
+  section.lastBlockId = toggleBlockId;
   return toggleBlockId;
 }
 
